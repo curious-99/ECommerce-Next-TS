@@ -15,18 +15,38 @@ interface IUser extends Document {
 }
 
 const schema = new mongoose.Schema({
-  _id: {type: String, required:[true,"Id is required"]},
-  name:{type:String, required:[true,"Photo is required"]},
+  _id: {
+    type: String, 
+    required:[true,"Id is required"]
+  },
+  name:{
+    type:String, 
+    required:[true,"Photo is required"]
+  },
   email:{
     type:String, 
     unique: [true, "Email already exists"], 
     required:[true,"Photo is required"],
     validate : validator.default.isEmail,
   },
-  photo:{type:String, required:[true,"Photo is required"]},
-  role:{type:String, enum:["admin","user"],default:"user"},
-  gender:{type:String, enum:["male","female"],required:[true, "Gender is required"]},
-  dob:{type:Date,required:[true, "DOB is required"]},
+  photo:{
+    type:String, 
+    required:[true,"Photo is required"]
+  },
+  role:{
+    type:String, 
+    enum:["admin","user"],
+    default:"user"
+  },
+  gender:{
+    type:String, 
+    enum:["male","female"],
+    required:[true, "Gender is required"]
+  },
+  dob:{
+    type:Date,
+    required:[true, "DOB is required"]
+  },
 }, { timestamps: true });
 
 schema.virtual("age").get(function(){
