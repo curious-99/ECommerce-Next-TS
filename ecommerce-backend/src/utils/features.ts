@@ -2,10 +2,11 @@ import mongoose from "mongoose"
 import * as dotenv from "dotenv";
 import { InvalidateCacheProps } from "../types/types.js";
 import { myCache } from "../app.js";
+import { Product } from "../models/product.js";
 dotenv.config();
 
 export const connectDB = async () => {
-  const uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI || "";
 
   mongoose.connect(uri,{
     dbName: "Ecommerce_24",
@@ -14,7 +15,7 @@ export const connectDB = async () => {
     .catch((e:any) => console.log(e, "Database connection failed"))
 }
 
-export const invalidatesCache = async ({product,order,admin}: InvalidateCacheProps) => {
+export const invalidateCache = async ({product,order,admin}: InvalidateCacheProps) => {
   if(product) {
     const productKeys: string[] = [
       "latest-products",
@@ -32,3 +33,13 @@ export const invalidatesCache = async ({product,order,admin}: InvalidateCachePro
   if(order) myCache.del("orders");
   if(admin) myCache.del("admin");
 }
+
+export const reduceStock = async (orderItems: OrderItemType[]) => {
+  for (let i = 0; i < orderItems.length; i++) {
+    const order = orderItems[i];
+    const product = await Product.findById(order.productId);
+    if (!product) throw new Error("Product Not Found");
+    product.stock -= order.quantity;
+    await product.save();
+  }
+};

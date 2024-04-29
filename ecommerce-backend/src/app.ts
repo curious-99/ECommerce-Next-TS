@@ -2,11 +2,15 @@ import express  from "express";
 import { connectDB } from "./utils/features.js";
 import { errorHandler } from "./middlewares/error.js";
 import NodeCache from "node-cache";
+import morgan from "morgan";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 import userRoute from "./routes/user.js";
 import productRoute from "./routes/products.js";
+import orderRoute from "./routes/order.js";
 
-const port = 4000;
+const port = process.env.PORT || 4000;
 connectDB();
 
 export const myCache = new NodeCache();
@@ -14,6 +18,7 @@ export const myCache = new NodeCache();
 const app = express();
 //Middlewares
 app.use(express.json());   
+app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
   res.send("API Working with /api/v1");
@@ -22,6 +27,7 @@ app.get("/", (req, res) => {
 // Using Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/products", productRoute);
+app.use("/api/v1/order", orderRoute); 
 
 app.use("/uploads", express.static("uploads"));
 app.use(errorHandler);

@@ -6,7 +6,7 @@ import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
 import { SearchRequestQuery } from "../types/types.js";
 import { myCache } from "../app.js";
-import { invalidatesCache } from "../utils/features.js";
+import { invalidateCache } from "../utils/features.js";
 // import { faker } from "@faker-js/faker";
 
 export const newProduct = TryCatch(
@@ -27,7 +27,7 @@ export const newProduct = TryCatch(
     stock,
     photo: photo?.path
   })
-  await invalidatesCache({product: true});
+  await invalidateCache({product: true});
 
   return res.status(201).json({
     status: "success",
@@ -78,7 +78,7 @@ export const getAdminProducts = TryCatch(async (req,res,next) => {
     products = await Product.find();
     myCache.set("all-products", JSON.stringify(products));
   }
-  const products = await Product.find();
+  products = await Product.find();
   return res.status(200).json({
     status: "success",
     message: "All products",
@@ -125,7 +125,7 @@ export const updateProduct = TryCatch( async (req,res,next) => {
   if(stock) product.stock = stock;
 
   await product.save();
-  await invalidatesCache({product: true});
+  await invalidateCache({product: true});
 
   return res.status(200).json({
     status: "success",
@@ -141,7 +141,7 @@ export const deleteProducts = TryCatch(async(req,res,next)=>{
     console.log("Deleted photo");
   });
   await Product.deleteOne();
-  await invalidatesCache({product: true});
+  await invalidateCache({product: true});
 
   return res.status(200).json({
     status: "success",
