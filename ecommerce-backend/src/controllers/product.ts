@@ -5,6 +5,8 @@ import { Product } from "../models/product.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
 import { SearchRequestQuery } from "../types/types.js";
+import { myCache } from "../app.js";
+import { invalidatesCache } from "../utils/features.js";
 // import { faker } from "@faker-js/faker";
 
 export const newProduct = TryCatch(
@@ -19,21 +21,31 @@ export const newProduct = TryCatch(
     if (!photo) return next(new ErrorHandler("Please add Photo", 400));
 
   await Product.create({
-      name,
-      category: category.toLowerCase(),
-      price,
-      stock,
-      photo: photo?.path
-    })
-  
-    return res.status(201).json({
-      status: "success",
-      message: "Product created successfully"
-    });
+    name,
+    category: category.toLowerCase(),
+    price,
+    stock,
+    photo: photo?.path
+  })
+  await invalidatesCache({product: true});
+
+  return res.status(201).json({
+    status: "success",
+    message: "Product created successfully"
+  });
 });
 
+// Revalidate on New, Update, Delete Product & on New Order  
 export const getLatestProducts = TryCatch(async (req,res,next) => {
-  const products = await Product.find().sort({createdAt: -1}).limit(5);
+  let products;
+
+  if(myCache.has("latest-products"))
+    products = JSON.parse(myCache.get("latest-products") as string);
+  else{
+    products = await Product.find().sort({createdAt: -1}).limit(5);
+    myCache.set("latest-products", JSON.stringify(products));
+  }
+
   return res.status(200).json({
     status: "success",
     message: "Latest products",
@@ -41,8 +53,15 @@ export const getLatestProducts = TryCatch(async (req,res,next) => {
   });
 });
 
+// Revalidate on New, Update, Delete Product & on New Order  
 export const getAllCategories = TryCatch(async (req,res,next) => {
-  const categories = await Product.distinct("category");
+  let categories;
+  if(myCache.has("categories"))
+    categories = JSON.parse(myCache.get("categories") as string);
+  else{
+    categories = await Product.distinct("category");
+    myCache.set("categories", JSON.stringify(categories));
+  }
   return res.status(200).json({
     status: "success",
     message: "All categories",
@@ -50,7 +69,15 @@ export const getAllCategories = TryCatch(async (req,res,next) => {
   });
 });
 
+// Revalidate on New, Update, Delete Product & on New Order  
 export const getAdminProducts = TryCatch(async (req,res,next) => {
+  let products;
+  if(myCache.has("all-products"))
+    products = JSON.parse(myCache.get("all-products") as string);
+  else{
+    products = await Product.find();
+    myCache.set("all-products", JSON.stringify(products));
+  }
   const products = await Product.find();
   return res.status(200).json({
     status: "success",
@@ -59,9 +86,16 @@ export const getAdminProducts = TryCatch(async (req,res,next) => {
   });
 });
 
+// Revalidate on New, Update, Delete Product & on New Order  
 export const getSingleProducts = TryCatch(async(req,res,next)=>{
-  const product = await Product.findById(req.params.id);
-  if(!product) return next(new ErrorHandler("Product not found", 404));
+  let product;
+  if(myCache.has(`product-${req.params.id}`))
+    product = JSON.parse(myCache.get(`product-${req.params.id}`) as string);
+  else{
+    product = await Product.findById(req.params.id);
+    if(!product) return next(new ErrorHandler("Product not found", 404)); 
+    myCache.set(`product-${req.params.id}`, JSON.stringify(product));
+  }
   return res.status(200).json({
     status: "success",
     message: "Product found",
@@ -91,6 +125,7 @@ export const updateProduct = TryCatch( async (req,res,next) => {
   if(stock) product.stock = stock;
 
   await product.save();
+  await invalidatesCache({product: true});
 
   return res.status(200).json({
     status: "success",
@@ -106,6 +141,8 @@ export const deleteProducts = TryCatch(async(req,res,next)=>{
     console.log("Deleted photo");
   });
   await Product.deleteOne();
+  await invalidatesCache({product: true});
+
   return res.status(200).json({
     status: "success",
     message: "Product deleted successfully"
