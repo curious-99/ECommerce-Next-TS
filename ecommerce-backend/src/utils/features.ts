@@ -15,20 +15,20 @@ export const connectDB = async () => {
     .catch((e:any) => console.log(e, "Database connection failed"))
 }
 
-export const invalidateCache = async ({product,order,admin,userId,orderId}: InvalidateCacheProps) => {
-  if(product) {
+export const invalidateCache = async ({product,order,admin,userId,orderId,productId,}: InvalidateCacheProps) => {
+  if (product) {
     const productKeys: string[] = [
       "latest-products",
       "all-products",
       "categories"
     ];
 
-    const products = await Product.find().select("_id");
-    products.forEach(product => {
-      productKeys.push(`product-${product._id}`);
-    });
-    
-    myCache.del("products");
+    if (typeof productId === "string") productKeys.push(`product-${productId}`);
+
+    if (typeof productId === "object")
+      productId.forEach((i) => productKeys.push(`product-${i}`));
+
+    myCache.del(productKeys);
   }
   if (order) {
     const ordersKeys: string[] = [

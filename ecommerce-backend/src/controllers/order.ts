@@ -36,13 +36,13 @@ export const newOrder = TryCatch(
     });
 
     await reduceStock(orderItems);
-    await reduceStock(orderItems);
 
     invalidateCache({
       product: true,
       order: true,
       admin: true,
-      userId: user
+      userId: user,
+      productId: order.orderItems.map((i) => String(i.productId))
     });
 
     return res.status(201).json({
