@@ -15,7 +15,7 @@ export const connectDB = async () => {
     .catch((e:any) => console.log(e, "Database connection failed"))
 }
 
-export const invalidateCache = async ({product,order,admin}: InvalidateCacheProps) => {
+export const invalidateCache = async ({product,order,admin,userId,orderId}: InvalidateCacheProps) => {
   if(product) {
     const productKeys: string[] = [
       "latest-products",
@@ -30,7 +30,15 @@ export const invalidateCache = async ({product,order,admin}: InvalidateCacheProp
     
     myCache.del("products");
   }
-  if(order) myCache.del("orders");
+  if (order) {
+    const ordersKeys: string[] = [
+      "all-orders",
+      `my-orders-${userId}`,
+      `order-${orderId}`,
+    ];
+
+    myCache.del(ordersKeys);
+  }
   if(admin) myCache.del("admin");
 }
 
