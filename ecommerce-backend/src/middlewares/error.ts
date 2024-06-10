@@ -22,3 +22,4 @@ export const TryCatch = (func: ControllerType) =>
     return Promise.resolve(func(req,res,next)).catch(next);
   }
 
+ 
