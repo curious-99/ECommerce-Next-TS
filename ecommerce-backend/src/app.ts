@@ -5,6 +5,8 @@ import NodeCache from "node-cache";
 import morgan from "morgan";
 import * as dotenv from "dotenv";
 dotenv.config();
+import Stripe from "stripe";
+import cors from "cors"; 
 
 import userRoute from "./routes/user.js";
 import productRoute from "./routes/products.js";
@@ -13,14 +15,17 @@ import paymentRoute from "./routes/payment.js";
 import dashboardRoute from "./routes/stats.js";
 
 const port = process.env.PORT || 4000;
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 connectDB();
 
+export const stripe = new Stripe(stripeSecretKey);
 export const myCache = new NodeCache();
-
+ 
 const app = express();
 //Middlewares
 app.use(express.json());   
 app.use(morgan("dev"));
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("API Working with /api/v1");

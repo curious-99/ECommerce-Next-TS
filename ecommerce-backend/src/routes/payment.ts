@@ -4,6 +4,7 @@ import { allCoupons, applyDiscount, createPaymentIntent, deleteCoupon, newCoupon
 
 const app = express();
 
+
 // Using Routes - api/v1/payment
 app.post('/coupon/new', newCoupon);
 app.post("/create", createPaymentIntent); // Using Routes - api/v1/payment/create

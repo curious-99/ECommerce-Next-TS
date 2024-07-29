@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./ecommerce-backend:/usr/src/app
+    environment:
+      MONGO_URI: mongodb://mongo:27017/your-db-name
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend 
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/usr/src/app
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
