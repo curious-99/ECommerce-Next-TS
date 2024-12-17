@@ -1,8 +1,11 @@
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
-import {lazy, Suspense} from 'react'
+import {lazy, Suspense, useEffect} from 'react'
 import Loader from "./components/loader";
 import Header from "./components/header";
 import {Toaster} from "react-hot-toast";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
+import { useDispatch, useSelector } from "react-redux";
 
 const Home = lazy(() => import("./pages/home"));
 const Search = lazy(() => import("./pages/search"));
@@ -32,6 +35,19 @@ const TransactionManagement = lazy(
 
 
 const App = () => {
+
+  const dispatch = useDispatch();
+  
+  // useEffect(()=>{
+  //   onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       console.log("User LoggedIn");
+  //     } else {
+  //       console.log("User Not LoggedIn");
+  //   })
+  // }, [])
+
+
   return (
    <Router>
     {/* Header */}
